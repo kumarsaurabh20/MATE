@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mate-omics"
+version = "3.0.0"
+description = "Multi-omics Analysis through Trajectory Embeddings"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+authors = [
+    {name = "Kawtar Ait abdelouahd"},
+    {name = "Wim Vriezen"},
+]
+dependencies = [
+    "numpy",
+    "pandas",
+    "scipy",
+    "scikit-learn",
+    "matplotlib",
+    "seaborn",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+umap = ["umap-learn"]
+stats = ["statsmodels"]
+dev = ["pytest"]
+
+[project.scripts]
+mate = "mate.cli:run"
+
+[project.urls]
+Repository = "https://github.com/kumarsaurabh20/MATE"
+Documentation = "https://github.com/kumarsaurabh20/MATE#readme"
+Issues = "https://github.com/kumarsaurabh20/MATE/issues"
+
+[tool.setuptools.packages.find]
+include = ["mate", "mate.*"]
+
+[tool.setuptools]
+py-modules = ["MATE_v3_0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.isort]
+profile = "black"
+combine_as_imports = true

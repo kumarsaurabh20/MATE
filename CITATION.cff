@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: >-
+  If you use MATE in your research, please cite this software using the metadata
+  below and record the version or commit used for your analysis.
+type: software
+title: "MATE: Multi-omics Analysis through Trajectory Embeddings"
+version: "3.0.0"
+authors:
+- given-names: "Kumar Saurabh"
+  family-names: "Singh"
+- given-names: "Kawtar"
+  family-names: "Ait abdelouahd"
+- given-names: "Wim"
+  family-names: "Vriezen"
+repository-code: "https://github.com/kumarsaurabh20/MATE"
+url: "https://github.com/kumarsaurabh20/MATE"
+license: MIT
+abstract: >-
+  MATE represents independently defined transcriptomics and metabolomics modules
+  as fingerprints and temporal trajectories, then integrates them through joint
+  embeddings and lag-aware comparisons. It supports matched-reference responses,
+  reference-free ordered trajectories, and optional continuous curve fitting.
+keywords:
+  - multi-omics
+  - transcriptomics
+  - metabolomics
+  - temporal trajectories
+  - lag analysis
+# Add date-released when this version is released and a DOI when one is assigned.

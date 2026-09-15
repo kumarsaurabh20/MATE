@@ -1,0 +1,6 @@
+include LICENSE THIRD_PARTY_NOTICES.md CITATION.cff
+include environment.yml requirements.txt gizmos.py
+recursive-include docs *.md *.py *.png
+recursive-include examples *.md *.py *.csv
+recursive-include tests *.py *.md *.json
+prune examples/falcarindiol/results

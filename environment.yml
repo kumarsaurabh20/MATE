@@ -1,0 +1,11 @@
+# Create from the repository root: conda env create -f environment.yml
+# The local package supplies analysis dependencies through pyproject.toml.
+name: mate
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      - "-e .[umap,stats,dev]"

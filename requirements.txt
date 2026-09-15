@@ -1,0 +1,4 @@
+# Install from the repository root with: python -m pip install -r requirements.txt
+# pyproject.toml remains the single source of dependency definitions.
+# Include UMAP and statsmodels for all supported analysis options.
+-e .[umap,stats]

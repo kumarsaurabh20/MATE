@@ -1,4 +1,4 @@
-# MATE
+# MATE 3.0
 
 **MATE - Multi-omics Feature Analysis through Trajectory Embeddings**
 
@@ -55,6 +55,11 @@ MATE preserves the **treatment × time** structure and explicitly evaluates temp
 ---
 
 # Conceptual workflow
+
+![MATE workflow: independent omics fingerprints, observed trajectories, optional continuous fitting, joint embeddings, and lag comparisons](docs/workflow.png)
+
+The diagram source is [docs/render_workflow.py](docs/render_workflow.py).
+Regenerate it with `python docs/render_workflow.py`.
 
 ```text
 Transcriptomics                         Metabolomics
@@ -195,10 +200,12 @@ Members
 and decay-rate-specific tables such as:
 
 ```text
-DR_25
+clone_DR_25
 ```
 
-The decay rate can be selected at run time.
+Table names must contain `clone` (case-insensitive), matching the original
+MEANtools importer. The decay rate can be selected at run time; `-dr 25` selects
+tables whose names contain `DR_25` when that decay rate is present.
 
 Module membership strings should resolve to feature IDs present in the corresponding quantitative table.
 
@@ -206,19 +213,52 @@ Module membership strings should resolve to feature IDs present in the correspon
 
 # Recommended command-line interface
 
-The current MATE refactor uses or is moving toward explicit omics-specific arguments such as:
+Run MATE from the repository root with explicit omics-specific arguments:
 
 ```bash
-python MATE_v2_3.py   --transcriptomics_table fungal_TR_expression.csv   --metabolomics_table fungal_MS_abundance.csv   --transcriptomics_db tomato_fungal_coexp.sqlite   --metabolomics_db tomato_fungal_coabun.sqlite   --metadata new_fungal_pheno.txt   --n_timepoints 3   --time_values "12,24,48"   --embedding_method both   --stratify_by condition   --trajectory_metric effect_size   --effect_size_threshold 0.5   -dr 25   -o MATE
+python -m mate \
+  --transcriptomics_table fungal_TR_expression.csv \
+  --metabolomics_table fungal_MS_abundance.csv \
+  --transcriptomics_db tomato_fungal_coexp.sqlite \
+  --metabolomics_db tomato_fungal_coabun.sqlite \
+  --metadata new_fungal_pheno.txt \
+  --trajectory_mode reference --reference_condition Mock \
+  --n_timepoints 3 --time_values "12,24,48" \
+  --embedding_method both --stratify_by condition \
+  --trajectory_metric effect_size --effect_size_threshold 0.5 \
+  -dr 25 -o MATE
 ```
 
-The exact option names should be checked against:
+Replace `Mock` with the reference condition in your metadata. For reference-free
+ordered trajectories, use `--trajectory_mode pseudotime` and omit
+`--reference_condition`. List all options with:
 
 ```bash
-python MATE_v2_3.py --help
+python -m mate --help
 ```
 
-because older development scripts retained legacy MEANtools flags such as `-ft`, `-qm`, `-dn`, `-g` and `-m`.
+The script entry point is `python MATE_v3_0.py`, with the same analysis arguments
+and output filenames as `python -m mate`. After installation, `mate` is also
+available as a command. Check the version with `python -m mate --version`.
+
+See [example commands](docs/example_commands.md) for Conda setup, reference and
+pseudotime analyses, continuous trajectories, and output-directory handling.
+
+## Try the bundled example
+
+The [falcarindiol example directory](examples/falcarindiol/README.md) contains
+synthetic feature tables, metadata, module definitions, and a runnable example.
+From the repository root:
+
+```bash
+python -m pip install -r requirements.txt
+python examples/falcarindiol/run_example.py
+```
+
+The runner creates SQLite module databases and writes results to
+`examples/falcarindiol/results/`. Add `--continuous` to include continuous
+trajectory fitting. These are demonstration data, not experimental falcarindiol
+measurements.
 
 ---
 
@@ -315,11 +355,24 @@ mock/reference samples
 A representative command is:
 
 ```bash
-python MATE_v2_3.py   --transcriptomics_table fungal_TR_expression.csv   --metabolomics_table fungal_MS_abundance.csv   --transcriptomics_db tomato_fungal_coexp.sqlite   --metabolomics_db tomato_fungal_coabun.sqlite   --metadata new_fungal_pheno.txt   --n_timepoints 3   --time_values "12,24,48"   --embedding_method both   --stratify_by condition   --trajectory_metric effect_size   --effect_size_threshold 0.5   -dr 25   -o MATE
+python -m mate \
+  --transcriptomics_table fungal_TR_expression.csv \
+  --metabolomics_table fungal_MS_abundance.csv \
+  --transcriptomics_db tomato_fungal_coexp.sqlite \
+  --metabolomics_db tomato_fungal_coabun.sqlite \
+  --metadata new_fungal_pheno.txt \
+  --trajectory_mode reference --reference_condition Mock \
+  --n_timepoints 3 --time_values "12,24,48" \
+  --embedding_method both --stratify_by condition \
+  --trajectory_metric effect_size --effect_size_threshold 0.5 \
+  -dr 25 -o MATE
 ```
 ---
 
 # Output files
+
+See [docs/output_columns.md](docs/output_columns.md) for the current v3.0 column
+definitions, units, mode-specific behavior, and lag sign convention.
 
 Output names vary slightly between development versions. Typical MATE outputs include the following classes of files.
 
@@ -658,65 +711,130 @@ Version-controlling the command used for each run is strongly recommended.
 
 # Software environment
 
-MATE is implemented in Python.
-
-Development versions use packages including:
-
-```text
-numpy
-pandas
-scipy
-scikit-learn
-matplotlib
-seaborn
-tqdm
-umap-learn
-```
-
-and MEANtools-compatible helper functions such as `gizmos.py` for importing cluster information from SQLite.
-
-A typical environment can be created with:
+MATE is implemented as a Python package. From the repository root, create an
+environment and install it in editable mode so changes to the source take effect
+immediately:
 
 ```bash
-conda create -n mate python=3.11
+conda env create -f environment.yml
 conda activate mate
-
-pip install numpy pandas scipy scikit-learn matplotlib seaborn tqdm umap-learn
+python -m mate --help
 ```
 
-If the analysis uses MEANtools-derived databases, ensure that the required local MEANtools helper modules are available on `PYTHONPATH` or in the working directory.
+This installs Python 3.11, MATE, the optional analysis dependencies, and pytest.
+See [environment.yml](environment.yml) and the
+[installation commands](docs/example_commands.md#install-with-conda).
+
+For analysis without development tools, the requirements-file installation is:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+Run it from the repository root. `requirements.txt` installs the local package
+in editable mode with its `umap` and `stats` extras; dependency definitions stay
+in `pyproject.toml`. It is an installation convenience, not a pinned environment
+lockfile.
+
+Core dependencies are declared in `pyproject.toml`. Optional extras are:
+
+- `umap`: UMAP embeddings (enabled by the default `--embedding_method umap`).
+- `stats`: GAM fitting and Granger tests. Automatic continuous fitting selects
+  GAM at five or more measured time points by default, so install this extra
+  for those runs or select `--trajectory_model linear` or `pchip`.
+- `dev`: the pytest test runner.
+
+For a minimal installation, use `python -m pip install -e .` and choose
+`--embedding_method none` or `tsne`. The SQLite reader lives in `mate/io.py` and
+does not require `gizmos.py`, RDKit, or NetworkX. The original `gizmos.py` remains
+available for separate MEANtools workflows.
 
 ---
 
-# Suggested repository structure
+# Repository structure
 
 ```text
 MATE/
-├── MATE_v2_3.py
-├── gizmos.py
+├── MATE_v3_0.py          # Script launcher and function exports
+├── mate/
+│   ├── __init__.py      # Package version
+│   ├── __main__.py      # python -m mate
+│   ├── cli.py           # Arguments and command entry point
+│   ├── pipeline.py      # Workflow orchestration and output writing
+│   ├── io.py            # Feature tables, metadata, SQLite modules
+│   ├── fingerprints.py  # SVD module fingerprints
+│   ├── trajectories.py  # Observed reference/pseudotime trajectories
+│   ├── continuous.py    # Curve fitting and bootstrap uncertainty
+│   ├── integration.py   # Member coherence and shared patterns
+│   ├── embeddings.py    # PCA, t-SNE, UMAP
+│   ├── clustering.py    # Clustering of PCA coordinates
+│   ├── lag.py           # Discrete and continuous lag comparisons
+│   ├── statistics.py    # PERMANOVA and Granger tests
+│   ├── plotting.py      # Figures and diagnostic plots
+│   └── utils.py         # Small shared helpers
+├── gizmos.py            # Legacy MEANtools utilities
 ├── README.md
-├── requirements.txt
+├── LICENSE              # MIT license
+├── THIRD_PARTY_NOTICES.md # Attribution for MEANtools-derived utilities
+├── CITATION.cff         # Software citation metadata
+├── environment.yml      # Conda environment including analysis/test dependencies
+├── MANIFEST.in          # Supporting files included in source distributions
+├── pyproject.toml       # Dependencies, installation, command entry point
+├── requirements.txt     # Install package plus optional analysis dependencies
 ├── examples/
 │   └── falcarindiol/
+│       ├── README.md
 │       ├── metadata_example.csv
 │       ├── transcriptomics_example.csv
-│       └── metabolomics_example.csv
+│       ├── metabolomics_example.csv
+│       ├── transcriptomics_modules.csv
+│       ├── metabolomics_modules.csv
+│       └── run_example.py
 ├── docs/
 │   ├── workflow.png
+│   ├── render_workflow.py
+│   ├── example_commands.md
 │   └── output_columns.md
 └── tests/
+    ├── conftest.py      # Synthetic dual-omics inputs
+    ├── test_analysis.py
+    ├── test_pipeline.py
+    └── data/            # Results captured from the original script
 ```
 
-For public release, it is also useful to provide:
+For new code, import functions from the module responsible for that analysis:
 
-```text
-LICENSE
-CITATION.cff
-environment.yml
-example command
-small test dataset
-expected test outputs
+```python
+from mate.fingerprints import calculate_fingerprints_for_matrix
+from mate.trajectories import calculate_trajectory_descriptors
+from mate.lag import cross_omics_lag_analysis
 ```
+
+Keep command-line parsing in `cli.py`, workflow decisions in `pipeline.py`, and
+scientific calculations in their respective modules. Pass data and options
+explicitly between functions. Analysis modules should not import the CLI or the
+pipeline. Each module owns its imports, with no wildcard imports or shared global
+options. Functions are also available through `MATE_v3_0` for script-based imports.
+
+Run the regression and input-boundary tests with:
+
+```bash
+python -m pytest -q
+```
+
+The regression tests compare CSV results against the original script for
+reference-aware, continuous, and pseudotime workflows, including joint PCA,
+bootstrap intervals, module coherence, and lag analysis. They also check generated
+plot files and the minimum measured-timepoint requirement for Granger analysis.
+See [baseline details](tests/data/README.md).
+
+Release metadata and supporting files are provided in [LICENSE](LICENSE),
+[CITATION.cff](CITATION.cff), [environment.yml](environment.yml), and
+[example commands](docs/example_commands.md). Source distributions include the
+examples, documentation, and regression fixtures through `MANIFEST.in`.
+
+The bundled examples are synthetic. A representative real-data validation
+dataset remains a useful addition for future releases.
 
 ---
 
@@ -796,11 +914,22 @@ The long-term goal is to preserve one principle across all modes:
 
 # Citation
 
-MATE is currently under development.
+Software citation metadata is provided in [CITATION.cff](CITATION.cff):
 
-If you use the software before a formal MATE publication is available, please cite the repository/version used and the relevant MEANtools publication or associated project documentation where appropriate.
+> Ait abdelouahd, Kawtar, and Vriezen, Wim. MATE: Multi-omics Analysis through
+> Trajectory Embeddings. Version 3.0.0. Computer software.
+> https://github.com/kumarsaurabh20/MATE
 
-A formal citation can be added here once available.
+Record the version or commit used in your analysis. A release date and DOI can
+be added to `CITATION.cff` when established; a preferred publication citation can
+be added when a MATE paper is available.
+
+## License
+
+MATE is distributed under the [MIT License](LICENSE), copyright 2026 Kawtar Ait
+abdelouahd and Wim Vriezen. Attribution and the original MIT notice for the
+MEANtools-derived utilities are retained in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 # For new feature requests, contact:
 
