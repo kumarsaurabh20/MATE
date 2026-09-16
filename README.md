@@ -916,7 +916,7 @@ The long-term goal is to preserve one principle across all modes:
 
 Software citation metadata is provided in [CITATION.cff](CITATION.cff):
 
-> Ait abdelouahd, Kawtar, and Vriezen, Wim. MATE: Multi-omics Analysis through
+> Singh, Kumar Saurabh, Ait abdelouahd, Kawtar, and Vriezen, Wim. MATE: Multi-omics Analysis through
 > Trajectory Embeddings. Version 3.0.0. Computer software.
 > https://github.com/kumarsaurabh20/MATE
 
