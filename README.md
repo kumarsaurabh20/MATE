@@ -188,9 +188,7 @@ The same experimental sample does not have to exist in both omics matrices if th
 
 ## 4. Module databases
 
-MATE can use SQLite databases containing transcriptomic and metabolomic module definitions.
-
-The original MEANtools-derived database structure uses cluster tables with module membership stored in fields such as:
+MATE can use SQLite databases containing transcriptomic and metabolomic module definitions. The original MEANtools-derived database structure uses cluster tables with module membership stored in fields such as:
 
 ```text
 Cluster
@@ -333,7 +331,7 @@ sets the output prefix.
 
 ---
 
-# Example: tomato pathogen-response dataset
+# Example: tomato pathogen-response dataset [Jeon et. al., 2020 https://doi.org/10.1016/j.cell.2019.11.037]
 
 A representative MATE analysis used transcriptomics and metabolomics from tomato leaves exposed to microbial elicitors at:
 
@@ -933,6 +931,7 @@ MEANtools-derived utilities are retained in
 
 # For new feature requests, contact:
 
+Dr. Kumar Saurabh Singh (IBL/BFFI, UM)
 kumarsaurabh.singh@maastrichtuniversity.nl
 
 ---
